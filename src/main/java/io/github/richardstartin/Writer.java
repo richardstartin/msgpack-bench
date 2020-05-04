@@ -4,11 +4,16 @@ import org.msgpack.core.MessagePacker;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.msgpack.core.MessagePack.UTF8;
 
 public class Writer {
 
   public static final Writer WRITER = new Writer();
+  private static final HashMap<String, byte[]> INTERN = new HashMap<>();
 
   @FunctionalInterface
   interface NumberWriter {
@@ -43,7 +48,15 @@ public class Writer {
   };
 
   public void write(String value, MessagePacker packer) throws IOException {
-    packer.packString(value);
+    byte[] bytes = INTERN.get(value);
+    if (null == bytes) {
+      synchronized (INTERN) {
+        bytes = value.getBytes(UTF8);
+        INTERN.put(value, bytes);
+      }
+    }
+    packer.packRawStringHeader(bytes.length);
+    packer.addPayload(bytes);
   }
 
 

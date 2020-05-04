@@ -2,6 +2,7 @@ package io.github.richardstartin.benchmark;
 
 import io.github.richardstartin.MySpan;
 import org.msgpack.core.MessagePacker;
+import org.msgpack.core.buffer.ArrayBufferOutput;
 import org.msgpack.core.buffer.MessageBufferOutput;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
@@ -21,8 +22,12 @@ public class TraceSerializationBenchmark {
       for (MySpan span : trace) {
         WRITER.writeSpan(span, packer);
       }
-      bh.consume(buffer);
-      buffer.close();
+      if (buffer instanceof ArrayBufferOutput) {
+        bh.consume(((ArrayBufferOutput)buffer).toByteArray());
+      } else {
+        bh.consume(buffer);
+      }
+      spanState.bufferStrategy.close(buffer);
       packer.close();
     }
   }
@@ -36,8 +41,8 @@ public class TraceSerializationBenchmark {
         WRITER.writeSpan(span, packer);
       }
     }
-    bh.consume(buffer);
-    buffer.close();
+    bh.consume(spanState.buffer);
+    spanState.bufferStrategy.close(buffer);
     packer.close();
   }
 }

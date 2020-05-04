@@ -6,6 +6,7 @@ import org.msgpack.core.buffer.MessageBufferOutput;
 import org.openjdk.jmh.annotations.*;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +29,8 @@ public class SpanState {
   MessagePackerStrategy messagePackerStrategy;
 
   List<MySpan>[] traces;
-  MessagePacker packer;
-  MessageBufferOutput buffer;
+
+  ByteBuffer buffer;
 
   @Setup(Level.Trial)
   public void init() {
@@ -41,7 +42,7 @@ public class SpanState {
       }
       traces[i] = trace;
     }
-    buffer = bufferStrategy.newOutput();
+    buffer = bufferStrategy.shareBuffer();
   }
 
 
