@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.msgpack.core.MessagePack.UTF8;
 
